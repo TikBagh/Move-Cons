@@ -1,6 +1,8 @@
 #include <iostream>
 
 class Animal {
+
+
 public:
     virtual void number_of_legs() = 0;
     virtual void sound() = 0;
@@ -11,12 +13,36 @@ public:
 
 class mammal : public Animal {
 protected:
+    static int counter;
     std::string name;
     int age;
 
 public:
     mammal(const std::string& Name, int Age) : name(Name), age(Age) {
+
+        counter++;
         std::cout << name << " It's the name" << std::endl;
+    }
+
+    mammal(mammal&& obj) noexcept : name(std::move(obj.name)), age(obj.age)
+    {
+        obj.age = 10;
+        std::cout << name << " Move constructor is called: " << std::endl;
+    }
+
+    mammal& operator = (mammal&& obj) noexcept {
+        if (this != &obj) {
+            name = std::move(obj.name);
+            age = obj.age;
+            obj.age = 0;
+            std::cout << name << " Move assignment operator called" << std::endl;
+            
+        }
+            return *this;
+    }
+
+    static int getCount() {
+        return counter;
     }
 
     bool operator<(const mammal& obj) const {
@@ -27,6 +53,8 @@ public:
         return age > obj.age;
     }
 };
+
+int mammal::counter = 0;
 
 class Lion : public mammal {
 public:
@@ -58,6 +86,12 @@ int main() {
     lion1.color();
     lion1.behavior();
     std::cout << (lion1 < lion2) << std:: endl;
+
+    std::cout << mammal::getCount() << std::endl;
+
+    Lion lion3(std::move(lion1));
+
+    lion1 = std::move(lion2);
     return 0;
 }
 
